@@ -30,7 +30,6 @@ export class UsersService {
         roleKey: true,
       },
     });
-    console.log(user)
     if (!user) return null;
     return {user};
   }
