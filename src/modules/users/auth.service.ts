@@ -16,6 +16,7 @@ import { UtilsService } from './utiles.service';
 import { env } from 'src/config/env';
 import { DataSource } from 'typeorm';
 import { VerificationReason } from './constants/user.constant';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -107,6 +108,67 @@ export class AuthService {
       refreshTokenExpiresAt: new Date(
         Date.now() + env().jwt.refreshExpireIn * 1000,
       ),
+    };
+  }
+
+  async login(loginDto: LoginDto, language: LanguageCodes) {
+    const user = await this.userRepo.findOne({
+      where: {
+        email: loginDto.email,
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException({
+        code: ERR_CODES.INVALID_CREDENTIALS,
+        message:
+          ErrCodes[ERR_CODES.INVALID_CREDENTIALS][language] ||
+          ErrCodes[ERR_CODES.INVALID_CREDENTIALS]['en'],
+      });
+    }
+
+    const isPasswordValid = await this.bcryptService.compare(
+      loginDto.password,
+      user.password,
+    );
+    if (!isPasswordValid) {
+      throw new BadRequestException({
+        code: ERR_CODES.INVALID_CREDENTIALS,
+        message:
+          ErrCodes[ERR_CODES.INVALID_CREDENTIALS][language] ||
+          ErrCodes[ERR_CODES.INVALID_CREDENTIALS]['en'],
+      });
+    }
+
+    // Update FCM token if provided
+    if (loginDto.fcmToken) {
+      await this.userRepo.update(user.id, {
+        fcmToken: loginDto.fcmToken,
+      });
+      user.fcmToken = loginDto.fcmToken;
+    }
+
+    // Generate tokens
+    const accessToken = await this.utilsService.generateAccessToken({
+      id: user.id,
+      isActive: user.isActive,
+      isBlocked: user.isBlocked,
+      defCountry: user.defCountry,
+    });
+
+    let refreshToken = user.token
+    if(!refreshToken){
+        refreshToken = await this.utilsService.generateRefreshToken(user);
+        await this.userRepo.update(user.id , {token:refreshToken})
+        
+    }
+
+      return {
+      profile: await this.usersService.findLoggedUserById(user.id),
+      accessToken,
+      refreshToken,
+      accessWillExpireIn: new Date(Date.now() + env().jwt.accessExpireIn * 1000),
+      refreshWillExpireIn: new Date(Date.now() + env().jwt.refreshExpireIn * 1000),
     };
   }
 }
