@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { HttpStatus, ValidationPipe } from '@nestjs/common';
 import { env } from './config/env';
 import { LanguageGuard } from './global/language/language.guard';
+import { HttpExceptionFilter } from './global/exceptions/http-exception-filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -19,7 +20,7 @@ async function bootstrap() {
   );
 
   app.useGlobalGuards(new LanguageGuard());
-
+  app.useGlobalFilters(new HttpExceptionFilter());
   await app.listen(env().port);
 
   if (env().environment === 'production') {

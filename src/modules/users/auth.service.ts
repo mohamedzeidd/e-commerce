@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -17,6 +17,8 @@ import { env } from 'src/config/env';
 import { DataSource } from 'typeorm';
 import { VerificationReason } from './constants/user.constant';
 import { LoginDto } from './dto/login.dto';
+
+import { BadRequestException } from 'src/global/exceptions/bad-request.exception';
 
 @Injectable()
 export class AuthService {
@@ -38,12 +40,10 @@ export class AuthService {
     });
 
     if (existingUser)
-      throw new BadRequestException({
-        code: ERR_CODES.EMAIL_ALREADY_EXISTS,
-        message:
-          ErrCodes[ERR_CODES.EMAIL_ALREADY_EXISTS][language] ||
-          ErrCodes[ERR_CODES.EMAIL_ALREADY_EXISTS]['en'],
-      });
+      throw new BadRequestException(
+        LanguageCodes.English,
+        ERR_CODES.EMAIL_ALREADY_EXISTS,
+      );
 
     if (registerDto.phoneNumber) {
       const userWithPhoneExists = await this.userRepo.findOne({
@@ -53,8 +53,8 @@ export class AuthService {
       });
       if (userWithPhoneExists)
         throw new BadRequestException(
-          ErrCodes[ERR_CODES.PHONE_NUMBER_ALREADY_EXISTS][language] ||
-            ErrCodes[ERR_CODES.PHONE_NUMBER_ALREADY_EXISTS]['en'],
+          LanguageCodes.English,
+          ERR_CODES.PHONE_NUMBER_ALREADY_EXISTS,
         );
     }
 
@@ -119,12 +119,10 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new BadRequestException({
-        code: ERR_CODES.INVALID_CREDENTIALS,
-        message:
-          ErrCodes[ERR_CODES.INVALID_CREDENTIALS][language] ||
-          ErrCodes[ERR_CODES.INVALID_CREDENTIALS]['en'],
-      });
+      throw new BadRequestException(
+        LanguageCodes.English,
+        ERR_CODES.INVALID_CREDENTIALS,
+      );
     }
 
     const isPasswordValid = await this.bcryptService.compare(
@@ -132,12 +130,10 @@ export class AuthService {
       user.password,
     );
     if (!isPasswordValid) {
-      throw new BadRequestException({
-        code: ERR_CODES.INVALID_CREDENTIALS,
-        message:
-          ErrCodes[ERR_CODES.INVALID_CREDENTIALS][language] ||
-          ErrCodes[ERR_CODES.INVALID_CREDENTIALS]['en'],
-      });
+      throw new BadRequestException(
+        LanguageCodes.English,
+        ERR_CODES.INVALID_CREDENTIALS,
+      );
     }
 
     // Update FCM token if provided
@@ -156,19 +152,22 @@ export class AuthService {
       defCountry: user.defCountry,
     });
 
-    let refreshToken = user.token
-    if(!refreshToken){
-        refreshToken = await this.utilsService.generateRefreshToken(user);
-        await this.userRepo.update(user.id , {token:refreshToken})
-        
+    let refreshToken = user.token;
+    if (!refreshToken) {
+      refreshToken = await this.utilsService.generateRefreshToken(user);
+      await this.userRepo.update(user.id, { token: refreshToken });
     }
 
-      return {
+    return {
       profile: await this.usersService.findLoggedUserById(user.id),
       accessToken,
       refreshToken,
-      accessWillExpireIn: new Date(Date.now() + env().jwt.accessExpireIn * 1000),
-      refreshWillExpireIn: new Date(Date.now() + env().jwt.refreshExpireIn * 1000),
+      accessWillExpireIn: new Date(
+        Date.now() + env().jwt.accessExpireIn * 1000,
+      ),
+      refreshWillExpireIn: new Date(
+        Date.now() + env().jwt.refreshExpireIn * 1000,
+      ),
     };
   }
 }
