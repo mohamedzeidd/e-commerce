@@ -19,6 +19,7 @@ import { VerificationReason } from './constants/user.constant';
 import { LoginDto } from './dto/login.dto';
 
 import { BadRequestException } from 'src/global/exceptions/bad-request.exception';
+import { Roles } from 'src/global/constants/roles.constant';
 
 @Injectable()
 export class AuthService {
@@ -40,10 +41,7 @@ export class AuthService {
     });
 
     if (existingUser)
-      throw new BadRequestException(
-        LanguageCodes.English,
-        ERR_CODES.EMAIL_ALREADY_EXISTS,
-      );
+      throw new BadRequestException(language, ERR_CODES.EMAIL_ALREADY_EXISTS);
 
     if (registerDto.phoneNumber) {
       const userWithPhoneExists = await this.userRepo.findOne({
@@ -53,7 +51,7 @@ export class AuthService {
       });
       if (userWithPhoneExists)
         throw new BadRequestException(
-          LanguageCodes.English,
+          language,
           ERR_CODES.PHONE_NUMBER_ALREADY_EXISTS,
         );
     }
@@ -68,6 +66,7 @@ export class AuthService {
       async (entityManager: EntityManager) => {
         const user = this.userRepo.create({
           ...registerDto,
+          role:{key:Roles.CUSTOMER},
           password: hashedPassword,
           defLanguage: registerDto.defLanguage || DEFAULT_LANGUAGE,
         });
@@ -83,6 +82,7 @@ export class AuthService {
 
         const accessToken = await this.utilsService.generateAccessToken({
           id: savedUser.id,
+          role: savedUser.role.key,
           isActive: savedUser.isActive,
           isBlocked: savedUser.isBlocked,
           defCountry: savedUser.defCountry,
@@ -116,13 +116,11 @@ export class AuthService {
       where: {
         email: loginDto.email,
       },
+      relations: { role: true },
     });
 
     if (!user) {
-      throw new BadRequestException(
-        LanguageCodes.English,
-        ERR_CODES.INVALID_CREDENTIALS,
-      );
+      throw new BadRequestException(language, ERR_CODES.INVALID_CREDENTIALS);
     }
 
     const isPasswordValid = await this.bcryptService.compare(
@@ -130,10 +128,7 @@ export class AuthService {
       user.password,
     );
     if (!isPasswordValid) {
-      throw new BadRequestException(
-        LanguageCodes.English,
-        ERR_CODES.INVALID_CREDENTIALS,
-      );
+      throw new BadRequestException(language, ERR_CODES.INVALID_CREDENTIALS);
     }
 
     // Update FCM token if provided
@@ -147,6 +142,7 @@ export class AuthService {
     // Generate tokens
     const accessToken = await this.utilsService.generateAccessToken({
       id: user.id,
+      role: user.role.key,
       isActive: user.isActive,
       isBlocked: user.isBlocked,
       defCountry: user.defCountry,
