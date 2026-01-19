@@ -7,6 +7,7 @@ import { env } from './config/env';
 import { AttachementsModule } from './modules/attachements/attachements.module';
 import { PostgresModule } from './postgres/postgres.module';
 import { JwtModule } from '@nestjs/jwt';
+import { RolesModule } from './modules/roles/roles.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { JwtModule } from '@nestjs/jwt';
     UsersModule,
     AttachementsModule,
     PostgresModule,
+    RolesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

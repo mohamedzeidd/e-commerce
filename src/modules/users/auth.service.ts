@@ -17,6 +17,7 @@ import { env } from 'src/config/env';
 import { DataSource } from 'typeorm';
 import { VerificationReason } from './constants/user.constant';
 import { LoginDto } from './dto/login.dto';
+import { Roles } from 'src/global/constants/roles.constant';
 
 @Injectable()
 export class AuthService {
@@ -69,6 +70,7 @@ export class AuthService {
         const user = this.userRepo.create({
           ...registerDto,
           password: hashedPassword,
+          role: { key: Roles.CUSTOMER },
           defLanguage: registerDto.defLanguage || DEFAULT_LANGUAGE,
         });
         const savedUser = await entityManager.save(User, user);
@@ -83,6 +85,7 @@ export class AuthService {
 
         const accessToken = await this.utilsService.generateAccessToken({
           id: savedUser.id,
+          role: savedUser.role.key,
           isActive: savedUser.isActive,
           isBlocked: savedUser.isBlocked,
           defCountry: savedUser.defCountry,
@@ -116,6 +119,7 @@ export class AuthService {
       where: {
         email: loginDto.email,
       },
+      relations: { role: true },
     });
 
     if (!user) {
@@ -151,24 +155,28 @@ export class AuthService {
     // Generate tokens
     const accessToken = await this.utilsService.generateAccessToken({
       id: user.id,
+      role: user.role.key,
       isActive: user.isActive,
       isBlocked: user.isBlocked,
       defCountry: user.defCountry,
     });
 
-    let refreshToken = user.token
-    if(!refreshToken){
-        refreshToken = await this.utilsService.generateRefreshToken(user);
-        await this.userRepo.update(user.id , {token:refreshToken})
-        
+    let refreshToken = user.token;
+    if (!refreshToken) {
+      refreshToken = await this.utilsService.generateRefreshToken(user);
+      await this.userRepo.update(user.id, { token: refreshToken });
     }
 
-      return {
+    return {
       profile: await this.usersService.findLoggedUserById(user.id),
       accessToken,
       refreshToken,
-      accessWillExpireIn: new Date(Date.now() + env().jwt.accessExpireIn * 1000),
-      refreshWillExpireIn: new Date(Date.now() + env().jwt.refreshExpireIn * 1000),
+      accessWillExpireIn: new Date(
+        Date.now() + env().jwt.accessExpireIn * 1000,
+      ),
+      refreshWillExpireIn: new Date(
+        Date.now() + env().jwt.refreshExpireIn * 1000,
+      ),
     };
   }
 }

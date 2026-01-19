@@ -15,6 +15,7 @@ import { LanguageCodes } from 'src/global/constants/language-codes.constants';
 import { CountryCodes } from 'src/global/constants/country-codes.constant';
 import { Roles } from 'src/global/constants/roles.constant';
 import { Verification } from './verification.entity';
+import { Role } from 'src/modules/roles/entities/role.entity';
 
 @Entity(ENTITY_USER)
 export class User {
@@ -75,9 +76,9 @@ export class User {
   })
   roleKey: string;
 
-  // @ManyToOne(() => Role, { onDelete: 'RESTRICT' })
-  // @JoinColumn({ name: 'role_key', referencedColumnName: 'key' })
-  // role: Role;
+  @ManyToOne(() => Role, { onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'role_key', referencedColumnName: 'key' })
+  role: Role;
 
   @Column({ name: 'email_verified', type: 'boolean', default: false })
   emailVerified: boolean;
