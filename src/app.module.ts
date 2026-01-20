@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './modules/users/users.module';
@@ -8,6 +8,7 @@ import { AttachementsModule } from './modules/attachements/attachements.module';
 import { PostgresModule } from './postgres/postgres.module';
 import { JwtModule } from '@nestjs/jwt';
 import { RolesModule } from './modules/roles/roles.module';
+import { LanguageMiddleware } from './global/language/language.middleware';
 
 @Module({
   imports: [
@@ -24,4 +25,8 @@ import { RolesModule } from './modules/roles/roles.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LanguageMiddleware).forRoutes('*');
+  }
+}

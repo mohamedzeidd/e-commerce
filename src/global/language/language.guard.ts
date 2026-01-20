@@ -1,4 +1,9 @@
-import { BadRequestException, CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+} from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { LanguageCodes } from '../constants/language-codes.constants';
 import { ERR_CODES } from '../constants/error-codes.constant';
@@ -9,13 +14,9 @@ export class LanguageGuard implements CanActivate {
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
-    const { headers } = request;
 
-    // Read header
-    const acceptLanguage = headers['x-language']?.toString().toLowerCase();
-
-    // Optional: if no header, default to English
-    const language = acceptLanguage || LanguageCodes.English;
+    // Read language from request object
+    const language = request.language;
 
     // Validate
     if (!Object.values(LanguageCodes).includes(language as LanguageCodes)) {
