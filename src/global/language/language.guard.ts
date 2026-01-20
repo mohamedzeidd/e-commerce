@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   CanActivate,
   ExecutionContext,
   Injectable,
@@ -7,6 +6,8 @@ import {
 import { Observable } from 'rxjs';
 import { LanguageCodes } from '../constants/language-codes.constants';
 import { ERR_CODES } from '../constants/error-codes.constant';
+import { BadRequestException } from '../exceptions/bad-request.exception';
+
 
 @Injectable()
 export class LanguageGuard implements CanActivate {

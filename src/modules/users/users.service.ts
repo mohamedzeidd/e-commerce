@@ -4,6 +4,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
+import { LoggedUser } from 'src/global/logged-user/logged-user.interface';
+import { LanguageCodes } from 'src/global/constants/language-codes.constants';
 
 @Injectable()
 export class UsersService {
@@ -34,7 +36,7 @@ export class UsersService {
     return {user};
   }
 
-  create(createUserDto: CreateUserDto) {
+  createUser(createUserDto: CreateUserDto , loggedUser:LoggedUser , language:LanguageCodes) {
     return 'This action adds a new user';
   }
 
