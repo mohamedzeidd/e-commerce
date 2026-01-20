@@ -9,9 +9,13 @@ import { PostgresModule } from './postgres/postgres.module';
 import { JwtModule } from '@nestjs/jwt';
 import { RolesModule } from './modules/roles/roles.module';
 import { LanguageMiddleware } from './global/language/language.middleware';
+import { AuthenticationMiddleware } from './global/logged-user/authentication.middleware';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Role } from './modules/roles/entities/role.entity';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([Role]),
     ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true, load: [env] }),
     JwtModule.register({
       global: true,
@@ -27,6 +31,6 @@ import { LanguageMiddleware } from './global/language/language.middleware';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LanguageMiddleware).forRoutes('*');
+    consumer.apply(LanguageMiddleware, AuthenticationMiddleware).forRoutes('*');
   }
 }
