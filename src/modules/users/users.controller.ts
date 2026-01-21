@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -15,13 +26,15 @@ import { LanguageCodes } from 'src/global/constants/language-codes.constants';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-
-
-
   @Post()
+  @HttpCode(HttpStatus.CREATED)
   @UseGuards(new AuthorizationGuard(PERMISSIONS.create_user))
-  createUser(@Body() createUserDto: CreateUserDto , @GetUser() loggedUser:LoggedUser , @GetLanguage() language:LanguageCodes) {
-    return this.usersService.createUser(createUserDto , loggedUser , language);
+  createUser(
+    @Body() createUserDto: CreateUserDto,
+    @GetUser() loggedUser: LoggedUser,
+    @GetLanguage() language: LanguageCodes,
+  ) {
+    return this.usersService.createUser(createUserDto, loggedUser, language);
   }
 
   @Get()
