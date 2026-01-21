@@ -5,6 +5,7 @@ import { Role } from './entities/role.entity';
 import { Repository } from 'typeorm';
 import { groupBy } from 'rxjs';
 import { permissionData, PERMISSIONS } from 'src/global/constants/permissions.contant';
+import { LoggedUser } from 'src/global/logged-user/logged-user.interface';
 
 @Injectable()
 export class PermissionsService {
@@ -24,6 +25,32 @@ export class PermissionsService {
         {} as Record<string, { key: PERMISSIONS; module: string; title: string }[]>,
       );
     }
-    return permissionData
+    return permissionData;
+  }
+
+  async getUserPermissions(loggedUser: LoggedUser) {
+    const role = await this.roleRepo.findOne({
+      where: {
+        key: loggedUser.role,
+        isDeleted: false,
+      },
+    });
+    if (!role) {
+      return permissionData.map((permission) => ({
+        ...permission,
+        isActive: false,
+      }));
+    }
+
+    const allPermissions: {
+      key: PERMISSIONS;
+      module: string;
+      title: string;
+    }[] = this.getAllPermissions() as any;
+
+    return allPermissions.map((permission) => ({
+      ...permission,
+      isActive: role.permissions.includes(permission.key),
+    }));
   }
 }
