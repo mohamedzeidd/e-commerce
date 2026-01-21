@@ -1,3 +1,7 @@
+import { FindOptionsSelect } from 'typeorm';
+import { User } from '../entities/user.entity';
+
+
 export enum AuthProvider {
   GOOGLE = 'google',
   FACEBOOK = 'facebook',
@@ -15,3 +19,15 @@ export enum VerificationReason {
   PHONE_VERIFICATION = 'phoneVerification',
   PASSWORD_RESET = 'passwordReset',
 }
+
+
+
+export const UserPopulatedFields:FindOptionsSelect<User> = {
+  id:true,
+  name:true,
+  profileImage:{
+    id:true
+  }
+}
+
+export const UserPopulatedFieldsSelect = ['id', 'name'];
