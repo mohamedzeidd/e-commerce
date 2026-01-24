@@ -10,7 +10,9 @@ export const env = () => ({
     database: process.env.PG_DATABASE!,
     synchronize: process.env.PG_SYNCHRONIZE === 'true' || true,
   },
-
+  redis: {
+    url: process.env.REDIS_URI!,
+  },
   auth: {
     activationCodeExpireIn: +(
       (process.env.ACTIVATION_CODE_EXPIRES_IN || 3 * 60 * 60) // 3 min

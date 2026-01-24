@@ -12,16 +12,19 @@ import { UserPopulatedFields, UserPopulatedFieldsSelect } from '../users/constan
 import { NotFoundException } from 'src/global/exceptions/not-found.exception';
 import { PERMISSIONS } from 'src/global/constants/permissions.contant';
 import { PermissionsService } from './permissions.service';
-import { FindRoleDto } from './find-role.dto';
+import { FindRoleDto } from './dto/find-role.dto';
 import { PaginationDto } from 'src/global/pagination/pagination.dto';
 import { Roles } from 'src/global/constants/roles.constant';
 import { BulkDeleteRoleDto } from './dto/bulk-delete-role.dto';
+import { AuditLoggerQueueService } from 'src/bullmq/audit-logger-queue.service';
+import { AuditMethod } from '../audit-logger/constants/audit-logger.constant';
 
 @Injectable()
 export class RolesService {
   constructor(
     @InjectRepository(Role) private readonly roleRepo: Repository<Role>,
     private readonly permissionsService: PermissionsService,
+    private readonly auditLoggerQueueService: AuditLoggerQueueService,
   ) {}
 
   async create(createRoleDto: CreateRoleDto, language: LanguageCodes, loggedUser: LoggedUser) {
@@ -41,7 +44,14 @@ export class RolesService {
       createdBy: { id: loggedUser.id },
     });
 
-    //TODO Add Logger here
+    await this.auditLoggerQueueService.addAuditLog(
+      AuditMethod.INSERT,
+      'ROLES',
+      'CREATE_ROLE',
+      `Role created ${role.key}`,
+      loggedUser.id,
+      role.key,
+    );
 
     return this.findOne(role.key, language);
   }
@@ -130,6 +140,17 @@ export class RolesService {
 
     await this.roleRepo.update(role.key, updateRoleDto);
 
+
+  await this.auditLoggerQueueService.addAuditLog(
+      AuditMethod.UPDATE,
+      'ROLES',
+      'UPDATE_ROLE',
+      `Role updated ${role.key}`,
+      loggedUser.id,
+      role.key,
+    );
+
+
     return this.findOne(role.key, language);
   }
 
@@ -145,7 +166,14 @@ export class RolesService {
 
     await this.roleRepo.update(role.key, { isDeleted: true });
 
-    //TODO Add Logger here
+    await this.auditLoggerQueueService.addAuditLog(
+      AuditMethod.DELETE,
+      'ROLES',
+      'DELETE_ROLE',
+      `Role Deleted ${role.key}`,
+      loggedUser.id,
+      role.key,
+    );
 
     return {
       message: 'Role deleted successfully',
@@ -161,7 +189,16 @@ export class RolesService {
 
     await this.roleRepo.update(keys, { isDeleted: true });
 
-    //TODO Add Logger here
+    const auditLogs = roles.map((role) => ({
+      method: AuditMethod.DELETE,
+      module: 'ROLES',
+      action: 'BULK_DELETE_ROLES',
+      message: `Role deleted: ${role.key}`,
+      userId: loggedUser.id,
+      targetId: role.key,
+    }));
+
+    await this.auditLoggerQueueService.addBulkAuditLogs(auditLogs);
 
     return {
       message: `Successfully deleted ${roles.length} roles`,

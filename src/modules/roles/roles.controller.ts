@@ -21,7 +21,7 @@ import { GetLanguage } from 'src/global/language/get-language.decorator';
 import { LanguageCodes } from 'src/global/constants/language-codes.constants';
 import { GetUser } from 'src/global/logged-user/get-user.decorator';
 import type { LoggedUser } from 'src/global/logged-user/logged-user.interface';
-import { FindRoleDto } from './find-role.dto';
+import { FindRoleDto } from './dto/find-role.dto';
 import { PaginationDecorator } from 'src/global/pagination/pagination.decorator';
 import { PaginationDto } from 'src/global/pagination/pagination.dto';
 import { BulkDeleteRoleDto } from './dto/bulk-delete-role.dto';
@@ -74,10 +74,9 @@ export class RolesController {
   @UseGuards(new AuthorizationGuard(PERMISSIONS.delete_role))
   async bulkDelete(
     @Body() bulkDeleteRoleDto: BulkDeleteRoleDto,
-    @GetLanguage() language:LanguageCodes,
-    @GetUser() loggedUser:LoggedUser
-  
+    @GetLanguage() language: LanguageCodes,
+    @GetUser() loggedUser: LoggedUser,
   ) {
-    return this.rolesService.bulkDelete(bulkDeleteRoleDto , language , loggedUser)
+    return this.rolesService.bulkDelete(bulkDeleteRoleDto, language, loggedUser);
   }
 }
