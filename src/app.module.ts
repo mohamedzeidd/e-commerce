@@ -12,6 +12,8 @@ import { LanguageMiddleware } from './global/language/language.middleware';
 import { AuthenticationMiddleware } from './global/logged-user/authentication.middleware';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Role } from './modules/roles/entities/role.entity';
+import { AuditLoggerModule } from './modules/audit-logger/audit-logger.module';
+import { BullMQModule } from './bullmq/bullmq.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { Role } from './modules/roles/entities/role.entity';
     AttachementsModule,
     PostgresModule,
     RolesModule,
+    AuditLoggerModule,
+    BullMQModule,
   ],
   controllers: [AppController],
   providers: [AppService],
