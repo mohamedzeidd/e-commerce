@@ -1,5 +1,6 @@
 import { FindOptionsSelect } from 'typeorm';
 import { User } from '../entities/user.entity';
+import { env } from 'src/config/env';
 
 
 export enum AuthProvider {
@@ -31,3 +32,7 @@ export const UserPopulatedFields:FindOptionsSelect<User> = {
 }
 
 export const UserPopulatedFieldsSelect = ['id', 'name'];
+
+
+export const DEFAULT_PROFILE_IMAGE_ID = '908c84cc-c6d6-4428-b3e3-c817a80c6249';
+export const DEFAULT_PROFILE_IMAGE_URL = `${env().apiUrl}/api/v1/attachments/${DEFAULT_PROFILE_IMAGE_ID}`;

@@ -2,6 +2,7 @@ export const env = () => ({
   port: +(process.env.PORT || 3000),
   environment: process.env.NODE_ENV?.trim() || 'development',
 
+  apiUrl: process.env.API_URL?.trim() || 'http://localhost:5000',
   postgres: {
     host: process.env.PG_HOST!,
     port: +process.env.PG_PORT!,
