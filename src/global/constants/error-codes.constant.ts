@@ -1,5 +1,4 @@
-import { LanguageCodes } from "./language-codes.constants";
-
+import { LanguageCodes } from './language-codes.constants';
 
 export enum ERR_CODES {
   EMAIL_NOT_VERIFIED = 'EMAIL_NOT_VERIFIED',
@@ -105,6 +104,7 @@ export enum ERR_CODES {
   PURCHASE_ORDER_MATERIAL_ALREADY_FULLY_RECEIVED = 'PURCHASE_ORDER_MATERIAL_ALREADY_FULLY_RECEIVED',
   INVALID_QUANTITY = 'INVALID_QUANTITY',
   ALERT_NOT_PENDING = 'ALERT_NOT_PENDING',
+  IMAGE_ONLY = 'IMAGE_ONLY',
 }
 
 export const ErrCodes: { [key in ERR_CODES]: Record<LanguageCodes, string> } = {
@@ -129,8 +129,7 @@ export const ErrCodes: { [key in ERR_CODES]: Record<LanguageCodes, string> } = {
     [LanguageCodes.Arabic]: 'المادة غير موجودة',
   },
   [ERR_CODES.INSUFFICIENT_MATERIAL_STOCK]: {
-    [LanguageCodes.English]:
-      'Insufficient material stock in the specified warehouse',
+    [LanguageCodes.English]: 'Insufficient material stock in the specified warehouse',
     [LanguageCodes.Arabic]: 'المخزون غير كافٍ للمادة في المستودع المحدد',
   },
   [ERR_CODES.PURCHASE_ORDER_NOT_FOUND]: {
@@ -146,8 +145,7 @@ export const ErrCodes: { [key in ERR_CODES]: Record<LanguageCodes, string> } = {
     [LanguageCodes.Arabic]: 'مادة طلب الشراء غير موجودة',
   },
   [ERR_CODES.PURCHASE_ORDER_MATERIAL_ALREADY_FULLY_RECEIVED]: {
-    [LanguageCodes.English]:
-      'Purchase Order Material has already been fully received',
+    [LanguageCodes.English]: 'Purchase Order Material has already been fully received',
     [LanguageCodes.Arabic]: 'تم استلام مادة طلب الشراء بالكامل بالفعل',
   },
   [ERR_CODES.INVALID_QUANTITY]: {
@@ -159,10 +157,8 @@ export const ErrCodes: { [key in ERR_CODES]: Record<LanguageCodes, string> } = {
     [LanguageCodes.Arabic]: 'المنتج موجود بالفعل في قائمة رغباتك',
   },
   [ERR_CODES.CANNOT_ASSIGN_TASK_TO_USER_OUTSIDE_YOUR_HIERARCHY]: {
-    [LanguageCodes.English]:
-      'Cannot assign task to user outside your hierarchy',
-    [LanguageCodes.Arabic]:
-      'لا يمكن تعيين المهمة إلى مستخدم خارج خطوط الموظفين الخاصة بك',
+    [LanguageCodes.English]: 'Cannot assign task to user outside your hierarchy',
+    [LanguageCodes.Arabic]: 'لا يمكن تعيين المهمة إلى مستخدم خارج خطوط الموظفين الخاصة بك',
   },
   [ERR_CODES.CAN_ONLY_MOVE_TASK_FORWARD_IN_WORKFLOW]: {
     [LanguageCodes.English]: 'Can only move task forward in workflow',
@@ -174,8 +170,7 @@ export const ErrCodes: { [key in ERR_CODES]: Record<LanguageCodes, string> } = {
   },
   [ERR_CODES.CANNOT_DELETE_STATUS_USED_BY_TASKS]: {
     [LanguageCodes.English]: 'Cannot delete status that is being used by tasks',
-    [LanguageCodes.Arabic]:
-      'لا يمكن حذف الحالة التي يتم استخدامها بواسطة المهام',
+    [LanguageCodes.Arabic]: 'لا يمكن حذف الحالة التي يتم استخدامها بواسطة المهام',
   },
   [ERR_CODES.STATUS_ALREADY_EXISTS]: {
     [LanguageCodes.English]: 'Status already exists',
@@ -334,10 +329,8 @@ export const ErrCodes: { [key in ERR_CODES]: Record<LanguageCodes, string> } = {
     [LanguageCodes.Arabic]: 'استخدام رمز الخصم غير موجود',
   },
   [ERR_CODES.STOCK_ALREADY_EXISTS]: {
-    [LanguageCodes.English]:
-      'Stock already exists for this material in this warehouse. Use update instead.',
-    [LanguageCodes.Arabic]:
-      'المخزون موجود بالفعل لهذا المادة في هذا المستودع. استخدم التحديث بدلاً من ذلك.',
+    [LanguageCodes.English]: 'Stock already exists for this material in this warehouse. Use update instead.',
+    [LanguageCodes.Arabic]: 'المخزون موجود بالفعل لهذا المادة في هذا المستودع. استخدم التحديث بدلاً من ذلك.',
   },
   FILE_NOT_FOUND: {
     [LanguageCodes.English]: 'File not found',
@@ -526,5 +519,9 @@ export const ErrCodes: { [key in ERR_CODES]: Record<LanguageCodes, string> } = {
   USER_NOT_VERIFIED_BY_CRM: {
     [LanguageCodes.English]: 'User Not Verified by CRM',
     [LanguageCodes.Arabic]: 'المستخدم غير موثق بواسطة CRM',
+  },
+  IMAGE_ONLY: {
+    [LanguageCodes.English]: 'You Can upload images only',
+    [LanguageCodes.Arabic]: 'يمكنك رفع الصور فقط',
   },
 };

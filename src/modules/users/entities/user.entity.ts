@@ -1,6 +1,7 @@
 import { ENTITY_USER } from 'src/global/constants/entities.constant';
 import { Attachement } from 'src/modules/attachements/entities/attachement.entity';
 import {
+  AfterLoad,
   Column,
   CreateDateColumn,
   Entity,
@@ -10,12 +11,13 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { AuthProvider } from '../constants/user.constant';
+import { AuthProvider, DEFAULT_PROFILE_IMAGE_URL } from '../constants/user.constant';
 import { LanguageCodes } from 'src/global/constants/language-codes.constants';
 import { CountryCodes } from 'src/global/constants/country-codes.constant';
 import { Roles } from 'src/global/constants/roles.constant';
 import { Verification } from './verification.entity';
 import { Role } from 'src/modules/roles/entities/role.entity';
+import { env } from 'src/config/env';
 
 @Entity(ENTITY_USER)
 export class User {
@@ -118,12 +120,13 @@ export class User {
   // })
   // minOrderAmount: number;
 
-  // @AfterLoad()
-  // setProfileImageUrl() {
-  //   if (this.profileImage?.id) {
-  //     this.profileImage = `${env().apiUrl}/api/v1/attachments/${this.profileImage.id}` as any;
-  //   } else {
-  //     this.profileImage = DEFAULT_PROFILE_IMAGE_URL as any;
-  //   }
-  // }
+  @AfterLoad()
+  setProfileImageUrl() {
+    if (this.profileImage?.id) {
+      console.log(env().apiUrl)
+      this.profileImage = `${env().apiUrl}/api/v1/attachments/${this.profileImage.id}` as any;
+    } else {
+      this.profileImage = DEFAULT_PROFILE_IMAGE_URL as any;
+    }
+  }
 }
