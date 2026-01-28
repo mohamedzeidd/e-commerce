@@ -13,9 +13,9 @@ export class CreateUserDto {
   @Transform(({ value }) => value?.trim())
   name?: string;
 
-  @IsOptional()
-  @IsUUID('4')
-  profileImage?: string;
+  // @IsOptional()
+  // @IsUUID('4')
+  // profileImage?: string;
 
   @IsEmail()
   email: string;

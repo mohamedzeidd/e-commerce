@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAttachementDto } from './dto/create-attachement.dto';
 import { UpdateAttachementDto } from './dto/update-attachement.dto';
 import { LoggedUser } from 'src/global/logged-user/logged-user.interface';
@@ -13,6 +13,7 @@ import * as fs from 'fs';
 import { AuditLoggerQueueService } from 'src/bullmq/audit-logger-queue.service';
 import { AuditMethod } from '../audit-logger/constants/audit-logger.constant';
 import { ENTITY_ATTACHEMENT } from 'src/global/constants/entities.constant';
+import { IdParamsDto } from '../../global/validators/id-params.dto';
 @Injectable()
 export class AttachementsService {
   constructor(
@@ -110,16 +111,47 @@ export class AttachementsService {
     }
   }
 
+  async findOne(params: IdParamsDto, loggedUser: LoggedUser, language: LanguageCodes) {
+    const attachment = await this.attachementRepo.findOne({
+      // where: [
+      //   { id: params.id, createdBy: { id: loggedUser.id }, isDeleted: false },
+      //   { id: params.id, createdBy: null as any, isDeleted: false },
+      // ],
+      where: { id: params.id, isDeleted: false },
+      relations: ['createdBy'],
+      select: {
+        createdBy: {
+          id: true,
+          name: true,
+          profileImage: true,
+        },
+      },
+    });
+
+    if (!attachment) throw new NotFoundException(language, ERR_CODES.FILE_NOT_FOUND);
+
+    return attachment;
+  }
+
+  async getFileForPreview(params: IdParamsDto, loggedUser: LoggedUser, language: LanguageCodes) {
+    const attachement = await this.findOne(params, loggedUser, language);
+
+    if (!fs.existsSync(attachement.filePath)) {
+      throw new NotFoundException(language, ERR_CODES.FILE_NOT_FOUND);
+    }
+
+    return {
+      attachement,
+      filePath: attachement.filePath,
+    };
+  }
+
   create(createAttachementDto: CreateAttachementDto) {
     return 'This action adds a new attachement';
   }
 
   findAll() {
     return `This action returns all attachements`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} attachement`;
   }
 
   update(id: number, updateAttachementDto: UpdateAttachementDto) {

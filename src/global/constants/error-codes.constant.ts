@@ -48,6 +48,7 @@ export enum ERR_CODES {
   USER_BLOCKED = 'USER_BLOCKED',
   CANNOT_BLOCK_SELF = 'CANNOT_BLOCK_SELF',
   FILE_NOT_FOUND = 'FILE_NOT_FOUND',
+  IMAGE_NOT_FOUND = "IMAGE_NOT_FOUND",
   STOCK_ALREADY_EXISTS = 'STOCK_ALREADY_EXISTS',
   ALERT_MODULE_NOT_SUPPORTED = 'ALERT_MODULE_NOT_SUPPORTED',
   NO_DEFAULT_STATUS = 'NO_DEFAULT_STATUS',
@@ -335,6 +336,10 @@ export const ErrCodes: { [key in ERR_CODES]: Record<LanguageCodes, string> } = {
   FILE_NOT_FOUND: {
     [LanguageCodes.English]: 'File not found',
     [LanguageCodes.Arabic]: 'الملف غير موجود',
+  },
+  IMAGE_NOT_FOUND:{
+    [LanguageCodes.English]:"Image not found",
+    [LanguageCodes.Arabic]:"الصورة غير موجودو"
   },
   CANNOT_BLOCK_SELF: {
     [LanguageCodes.English]: 'You cannot block yourself',
