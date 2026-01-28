@@ -123,7 +123,7 @@ export class User {
   @AfterLoad()
   setProfileImageUrl() {
     if (this.profileImage?.id) {
-      console.log(env().apiUrl)
+      console.log(env().apiUrl);
       this.profileImage = `${env().apiUrl}/api/v1/attachments/${this.profileImage.id}` as any;
     } else {
       this.profileImage = DEFAULT_PROFILE_IMAGE_URL as any;

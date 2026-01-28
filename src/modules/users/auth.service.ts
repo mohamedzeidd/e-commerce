@@ -7,10 +7,7 @@ import { BcryptService } from 'src/global/bcrypt/bcrypt.service';
 import { Verification } from './entities/verification.entity';
 import { UsersService } from './users.service';
 import { JwtService } from '@nestjs/jwt';
-import {
-  DEFAULT_LANGUAGE,
-  LanguageCodes,
-} from 'src/global/constants/language-codes.constants';
+import { DEFAULT_LANGUAGE, LanguageCodes } from 'src/global/constants/language-codes.constants';
 import { ERR_CODES, ErrCodes } from 'src/global/constants/error-codes.constant';
 import { UtilsService } from './utiles.service';
 import { env } from 'src/config/env';
@@ -20,6 +17,9 @@ import { LoginDto } from './dto/login.dto';
 
 import { BadRequestException } from 'src/global/exceptions/bad-request.exception';
 import { Roles } from 'src/global/constants/roles.constant';
+import { LoggedUser } from 'src/global/logged-user/logged-user.interface';
+import { AttachementsService } from '../attachements/attachements.service';
+import { IdParamsDto } from '../../global/validators/id-params.dto';
 
 @Injectable()
 export class AuthService {
@@ -33,6 +33,7 @@ export class AuthService {
     private readonly verificationRepo: Repository<Verification>,
     private readonly usersService: UsersService,
     private readonly utilsService: UtilsService,
+    private readonly attachementsService: AttachementsService,
   ) {}
 
   async register(registerDto: RegisterDto, language: LanguageCodes) {
@@ -40,8 +41,7 @@ export class AuthService {
       where: [{ email: registerDto.email }],
     });
 
-    if (existingUser)
-      throw new BadRequestException(language, ERR_CODES.EMAIL_ALREADY_EXISTS);
+    if (existingUser) throw new BadRequestException(language, ERR_CODES.EMAIL_ALREADY_EXISTS);
 
     if (registerDto.phoneNumber) {
       const userWithPhoneExists = await this.userRepo.findOne({
@@ -49,52 +49,43 @@ export class AuthService {
           phoneNumber: registerDto.phoneNumber,
         },
       });
-      if (userWithPhoneExists)
-        throw new BadRequestException(
-          language,
-          ERR_CODES.PHONE_NUMBER_ALREADY_EXISTS,
-        );
+      if (userWithPhoneExists) throw new BadRequestException(language, ERR_CODES.PHONE_NUMBER_ALREADY_EXISTS);
     }
 
     const hashedPassword = await this.bcryptService.hash(registerDto.password);
     const verificationCode = this.utilsService.getVerificationCode();
-    const verificationExpireAt = new Date(
-      Date.now() + env().auth.activationCodeExpireIn * 1000,
-    );
+    const verificationExpireAt = new Date(Date.now() + env().auth.activationCodeExpireIn * 1000);
 
-    const result = await this.dataSource.transaction(
-      async (entityManager: EntityManager) => {
-        const user = this.userRepo.create({
-          ...registerDto,
-          role:{key:Roles.CUSTOMER},
-          password: hashedPassword,
-          defLanguage: registerDto.defLanguage || DEFAULT_LANGUAGE,
-        });
-        const savedUser = await entityManager.save(User, user);
+    const result = await this.dataSource.transaction(async (entityManager: EntityManager) => {
+      const user = this.userRepo.create({
+        ...registerDto,
+        role: { key: Roles.CUSTOMER },
+        password: hashedPassword,
+        defLanguage: registerDto.defLanguage || DEFAULT_LANGUAGE,
+      });
+      const savedUser = await entityManager.save(User, user);
 
-        const verification = this.verificationRepo.create({
-          user: savedUser,
-          verificationCode,
-          verificationExpireAt,
-          verificationReason: VerificationReason.EMAIL_VERIFICATION,
-        });
-        await entityManager.save(Verification, verification);
+      const verification = this.verificationRepo.create({
+        user: savedUser,
+        verificationCode,
+        verificationExpireAt,
+        verificationReason: VerificationReason.EMAIL_VERIFICATION,
+      });
+      await entityManager.save(Verification, verification);
 
-        const accessToken = await this.utilsService.generateAccessToken({
-          id: savedUser.id,
-          role: savedUser.role.key,
-          isActive: savedUser.isActive,
-          isBlocked: savedUser.isBlocked,
-          defCountry: savedUser.defCountry,
-        });
+      const accessToken = await this.utilsService.generateAccessToken({
+        id: savedUser.id,
+        role: savedUser.role.key,
+        isActive: savedUser.isActive,
+        isBlocked: savedUser.isBlocked,
+        defCountry: savedUser.defCountry,
+      });
 
-        const refreshToken =
-          await this.utilsService.generateRefreshToken(savedUser);
-        await entityManager.update(User, savedUser.id, { token: refreshToken });
+      const refreshToken = await this.utilsService.generateRefreshToken(savedUser);
+      await entityManager.update(User, savedUser.id, { token: refreshToken });
 
-        return { savedUser, accessToken, refreshToken };
-      },
-    );
+      return { savedUser, accessToken, refreshToken };
+    });
 
     //TODO Send Email Verification with bullmq
 
@@ -102,12 +93,8 @@ export class AuthService {
       accessToken: result.accessToken,
       refreshToken: result.refreshToken,
       profile: await this.usersService.findLoggedUserById(result.savedUser.id),
-      accessTokenExpiresAt: new Date(
-        Date.now() + env().jwt.accessExpireIn * 1000,
-      ),
-      refreshTokenExpiresAt: new Date(
-        Date.now() + env().jwt.refreshExpireIn * 1000,
-      ),
+      accessTokenExpiresAt: new Date(Date.now() + env().jwt.accessExpireIn * 1000),
+      refreshTokenExpiresAt: new Date(Date.now() + env().jwt.refreshExpireIn * 1000),
     };
   }
 
@@ -123,10 +110,7 @@ export class AuthService {
       throw new BadRequestException(language, ERR_CODES.INVALID_CREDENTIALS);
     }
 
-    const isPasswordValid = await this.bcryptService.compare(
-      loginDto.password,
-      user.password,
-    );
+    const isPasswordValid = await this.bcryptService.compare(loginDto.password, user.password);
     if (!isPasswordValid) {
       throw new BadRequestException(language, ERR_CODES.INVALID_CREDENTIALS);
     }
@@ -158,12 +142,23 @@ export class AuthService {
       profile: await this.usersService.findLoggedUserById(user.id),
       accessToken,
       refreshToken,
-      accessWillExpireIn: new Date(
-        Date.now() + env().jwt.accessExpireIn * 1000,
-      ),
-      refreshWillExpireIn: new Date(
-        Date.now() + env().jwt.refreshExpireIn * 1000,
-      ),
+      accessWillExpireIn: new Date(Date.now() + env().jwt.accessExpireIn * 1000),
+      refreshWillExpireIn: new Date(Date.now() + env().jwt.refreshExpireIn * 1000),
     };
+  }
+
+  async updateProfileImage(image: Express.Multer.File, loggedUser: LoggedUser, language: LanguageCodes) {
+    if (!image) throw new BadRequestException(language, ERR_CODES.IMAGE_NOT_FOUND);
+
+    const attachement = await this.attachementsService.uploadFile(image, loggedUser, language);
+
+    await this.userRepo.update(loggedUser.id!, { profileImage: attachement });
+    return this.usersService.findLoggedUserById(loggedUser.id!);
+  }
+
+  async getProfileImage(loggedUser: LoggedUser, language: LanguageCodes) {
+    const user = await this.usersService.findLoggedUserProfile(loggedUser);
+
+    return this.attachementsService.getFileForPreview({ id: user?.profileImage.filePath! }, loggedUser, language);
   }
 }

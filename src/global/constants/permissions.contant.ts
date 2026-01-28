@@ -4,6 +4,7 @@ export const enum PERMISSIONS {
   change_password = 'change_password',
   update_phone_number = 'update_phone_number',
   update_profile = 'update_profile',
+  update_profile_image = 'update_profile_image',
   find_users = 'find_users',
   update_users = 'update_users',
   create_nested_user = 'create_nested_user',
@@ -17,6 +18,7 @@ export const enum PERMISSIONS {
   update_user = 'update_user',
   delete_user = 'delete_user',
   block_user = 'block_user',
+  update_user_image = 'update_user_image',
   // warehouse permissions
   create_warehouse = 'create_warehouse',
   read_warehouse = 'read_warehouse',
@@ -325,6 +327,7 @@ export const permissionData: Array<{ key: PERMISSIONS; module: string; title: st
   { key: PERMISSIONS.change_password, module: 'auth', title: 'Change Password' },
   { key: PERMISSIONS.update_phone_number, module: 'auth', title: 'Update Phone Number' },
   { key: PERMISSIONS.update_profile, module: 'auth', title: 'Update Profile' },
+  { key: PERMISSIONS.update_profile_image, module: 'auth', title: 'Update Profile Image' },
   { key: PERMISSIONS.find_users, module: 'auth', title: 'Find Users' },
   { key: PERMISSIONS.update_users, module: 'auth', title: 'Update Users' },
   { key: PERMISSIONS.create_nested_user, module: 'auth', title: 'Create Nested User' },
@@ -338,6 +341,7 @@ export const permissionData: Array<{ key: PERMISSIONS; module: string; title: st
   { key: PERMISSIONS.update_user, module: 'user', title: 'Update User' },
   { key: PERMISSIONS.delete_user, module: 'user', title: 'Delete User' },
   { key: PERMISSIONS.block_user, module: 'user', title: 'Block User' },
+  { key: PERMISSIONS.update_user_image, module: 'user', title: 'Update User Image' },
 
   // Warehouse permissions
   { key: PERMISSIONS.create_warehouse, module: 'warehouse', title: 'Create Warehouse' },
